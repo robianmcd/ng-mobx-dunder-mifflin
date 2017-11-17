@@ -1,10 +1,32 @@
-import { Component } from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import EmployeeStore from './services/stores/employeeStore.service';
+import Employee from './models/employee.model';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div *mobxAutorun>
+      hello world
+
+      <div *ngFor="let employee of employeeStore.employees">
+        {{employee.name}} - {{getChildrenString(employee)}}
+      </div>
+      
+      <div *ngIf="employeeStore.boss">Boss man: {{employeeStore.boss.name}}</div>
+    </div>
+  `,
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+
+  constructor(private employeeStore: EmployeeStore) {
+
+  }
+
+
+  getChildrenString(employee: Employee) {
+    return employee.children.map(c => c.name).join(', ');
+  }
+
 }
