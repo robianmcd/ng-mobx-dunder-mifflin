@@ -20,7 +20,7 @@ export default class EmployeeStore {
   }
 
   constructor(private api: Api) {
-    this.reloadEmployees();
+    //this.reloadEmployees();
   }
 
   @asyncAction

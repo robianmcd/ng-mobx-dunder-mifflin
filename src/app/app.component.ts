@@ -4,6 +4,8 @@ import Employee from './models/employee.model';
 
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/interval';
+import {observable} from 'mobx';
+import asyncAction from './asyncAction';
 
 @Component({
   selector: 'app-root',
@@ -17,11 +19,21 @@ import 'rxjs/add/observable/interval';
       </div>
 
       <div *ngIf="employeeStore.boss">Boss man: {{employeeStore.boss.name}}</div>
+      
+      <div>
+        <button (click)="employeeStore.reloadEmployees()">Axios call</button>
+      </div>
+      <div>
+        <button (click)="setTimeoutAction()">Set Timeout</button>
+        {{setTimeoutValue}}
+      </div>
     </div>
   `,
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  @observable
+  setTimeoutValue = '';
 
   constructor(private employeeStore: EmployeeStore) {
 
@@ -30,6 +42,20 @@ export class AppComponent {
 
   getChildrenString(employee: Employee) {
     return employee.children.map(c => c.name).join(', ');
+  }
+
+  @asyncAction
+  setTimeoutAction() {
+    this.setTimeoutValue = '';
+    setTimeout(() => {
+        this.setTimeoutValue = 'first set timeout done';
+
+        setTimeout(() => {
+          this.setTimeoutValue = 'second set timeout done';
+
+        }, 1000);
+
+    }, 1000);
   }
 
 }

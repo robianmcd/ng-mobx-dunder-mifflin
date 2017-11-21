@@ -2,6 +2,8 @@ import {action, endAction, runInAction, startAction} from 'mobx';
 
 declare const Zone;
 
+const ENABLE_LOGGING = false;
+
 const asyncAction = function (target, prop: string, descriptor) {
   let pendingAction;
   let finishedInitialSyncAction = false;
@@ -24,22 +26,25 @@ const asyncAction = function (target, prop: string, descriptor) {
     // }
 
     onScheduleTask(delegate, currentZone, targetZone, task) {
-      console.log('SCHEDULING TASK', task.type);
+      ENABLE_LOGGING && console.log('SCHEDULING TASK', task.type);
       return delegate.scheduleTask(targetZone, task);
     },
 
     onInvokeTask(delegate, currentZone, targetZone, task, ...args) {
       let actionName = `${prop}:${task.callback.name || 'async'}`;
-      console.log('INVOKE TASK', task.type, task.callback.name);
-      return delegate.invokeTask(targetZone, task, ...args);
-      //return runInAction(actionName, () => delegate.invokeTask(targetZone, task, ...args));
+      ENABLE_LOGGING && console.log('INVOKE TASK', task.type, task.callback);
+      if (task.type === 'macroTask') {
+        return runInAction(actionName, () => delegate.invokeTask(targetZone, task, ...args));
+      } else {
+        return delegate.invokeTask(targetZone, task, ...args);
+      }
     },
 
     // onIntercept(parentZoneDelegate, currentZone, targetZone, delegate: Function, source: string) {
     //   console.log('what the fork?');
     // },
     onHasTask(parentZoneDelegate, currentZone, targetZone, hasTaskState) {
-      console.log('HAS TASK', hasTaskState);
+      ENABLE_LOGGING && console.log('HAS TASK', hasTaskState);
 
       if (hasTaskState.change === 'microTask' && finishedInitialSyncAction) {
         if (hasTaskState.microTask) {
